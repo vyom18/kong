@@ -5,7 +5,7 @@ local utils = require "kong.tools.utils"
 local function validate_target(target)
   local p = utils.normalize_ip(target)
   if not p then
-    return nil, "Invalid target; not a valid hostname or ip address"
+    return nil, "Invalid target ('" .. target .. "'); not a valid hostname or ip address"
   end
   return true
 end

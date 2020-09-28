@@ -7,13 +7,13 @@ local null = ngx.null
 local validate_name = function(name)
   local p = utils.normalize_ip(name)
   if not p then
-    return nil, "Invalid name; must be a valid hostname"
+    return nil, "Invalid name ('" .. name .. "'); must be a valid hostname"
   end
   if p.type ~= "name" then
-    return nil, "Invalid name; no ip addresses allowed"
+    return nil, "Invalid name ('" .. name .. "'); no ip addresses allowed"
   end
   if p.port then
-    return nil, "Invalid name; no port allowed"
+    return nil, "Invalid name ('" .. name .. "'); no port allowed"
   end
   return true
 end
