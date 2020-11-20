@@ -15,6 +15,7 @@ local split = utils.split
 local strip = utils.strip
 local string_find = string.find
 local string_gsub = string.gsub
+local string_byte = string.byte
 local check_https = utils.check_https
 local encode_args = utils.encode_args
 local random_string = utils.random_string
@@ -31,6 +32,7 @@ local _M = {}
 
 
 local EMPTY = {}
+local SLASH = string_byte("/")
 local RESPONSE_TYPE = "response_type"
 local STATE = "state"
 local CODE = "code"
@@ -1057,32 +1059,31 @@ local function invalid_oauth2_method(endpoint_name)
 end
 
 function _M.execute(conf)
+  local path = kong.request.get_path()
+  local has_end_slash = string_byte(path, -1) == SLASH
+
+  if string_find(path, "/oauth2/token", has_end_slash and -14 or -13, true) then
+    if kong.request.get_method() ~= "POST" then
+      local err = invalid_oauth2_method("token")
+      return kong.response.exit(err.status, err.message, err.headers)
+    end
+
+    return issue_token(conf)
+  end
+
+  if string_find(path, "/oauth2/authorize", has_end_slash and -18 or -17, true) then
+    if kong.request.get_method() ~= "POST" then
+      local err = invalid_oauth2_method("authorization")
+      return kong.response.exit(err.status, err.message, err.headers)
+    end
+
+    return authorize(conf)
+  end
+
   if conf.anonymous and kong.client.get_credential() then
     -- we're already authenticated, and we're configured for using anonymous,
     -- hence we're in a logical OR between auth methods and we're already done.
     return
-  end
-
-  local method = kong.request.get_method()
-  if method == "POST" or method == "GET" then
-    local path = kong.request.get_path()
-    if string_find(path, "/oauth2/token", nil, true) then
-      if method ~= "POST" then
-        local err = invalid_oauth2_method("token")
-        return kong.response.exit(err.status, err.message, err.headers)
-      end
-
-      return issue_token(conf)
-    end
-
-    if string_find(path, "/oauth2/authorize", nil, true) then
-      if method ~= "GET" and method ~= "POST" then
-        local err = invalid_oauth2_method("authorization")
-        kong.response.exit(err.status, err.message, err.headers)
-      end
-
-      return authorize(conf)
-    end
   end
 
   local ok, err = do_authentication(conf)
