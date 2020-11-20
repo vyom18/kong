@@ -1037,21 +1037,21 @@ local function do_authentication(conf)
   return true
 end
 
-local function invalid_oauth2_methods(oauth2_type)
+local function invalid_oauth2_method(endpoint_name)
   return {
      status = 400,
      message = {
      [ERROR] = "invalid_method",
        error_description = "The HTTP method " ..
        kong.request.get_method() ..
-       " is invalid for the " .. oauth2_type .. " endpoint"
+       " is invalid for the " .. endpoint_name .. " endpoint"
      },
      headers = {
        ["WWW-Authenticate"] = 'Bearer realm="service" error=' ..
                               '"invalid_method" error_description=' ..
                               '"The HTTP method ' .. kong.request.get_method()
                               .. ' is invalid for the ' ..
-                              oauth2_type .. ' endpoint"'
+                              endpoint_name .. ' endpoint"'
      }
    }
 end
@@ -1063,30 +1063,27 @@ function _M.execute(conf)
     return
   end
 
+  local method = kong.request.get_method()
+  if method == "POST" or method == "GET" then
+    local path = kong.request.get_path()
+    if string_find(path, "/oauth2/token", nil, true) then
+      if method ~= "POST" then
+        local err = invalid_oauth2_method("token")
+        return kong.response.exit(err.status, err.message, err.headers)
+      end
 
-  local path = kong.request.get_path()
-
-  local from = string_find(path, "/oauth2/token", nil, true)
-  if from then
-    if kong.request.get_method() == "POST" then
       return issue_token(conf)
-    else
-      local err = invalid_oauth2_methods('bearer token generation')
-      kong.response.exit(err.status, err.message, err.headers)
     end
-  end
 
-  from = string_find(path, "/oauth2/authorize", nil, true)
-  if from then
-    if kong.request.get_method() == "POST" or
-       kong.request.get_method() == "GET" then
+    if string_find(path, "/oauth2/authorize", nil, true) then
+      if method ~= "GET" and method ~= "POST" then
+        local err = invalid_oauth2_method("authorization")
+        kong.response.exit(err.status, err.message, err.headers)
+      end
+
       return authorize(conf)
-    else
-      local err = invalid_oauth2_methods('authorization')
-      kong.response.exit(err.status, err.message, err.headers)
     end
   end
-
 
   local ok, err = do_authentication(conf)
   if not ok then

@@ -1349,7 +1349,7 @@ describe("Plugin: oauth2 [#" .. strategy .. "]", function()
           })
           local body = assert.res_status(400, res)
           local json = cjson.decode(body)
-          assert.same({ error_description = "The HTTP method GET is invalid for the bearer token generation endpoint",
+          assert.same({ error_description = "The HTTP method GET is invalid for the token endpoint",
                         error = "invalid_method" }, json)
         end)
         it("returns an error when grant_type is not sent", function()
