@@ -7,7 +7,7 @@
 Kong is a cloud-native, fast, scalable, and distributed Microservice
 Abstraction Layer *(also known as an API Gateway or API Middleware)*.
 Made available as an open-source project in 2015, its core values are
-high performance and extensibility.
+high performance and extensibility and also compability .
 
 Actively maintained, Kong is widely used in production at companies ranging
 from startups to Global 5000 as well as government organizations.
@@ -31,10 +31,10 @@ IRC (freenode): [#kong](https://webchat.freenode.net/?channels=kong) |
 ## Why Kong?
 
 If you are building for the web, mobile, or IoT (Internet of Things) you will
-likely end up needing common functionality to run your actual software. Kong
+definitely need common functionality to run your actual software. Kong
 can help by acting as a gateway (or a sidecar) for microservices requests while
 providing load balancing, logging, authentication, rate-limiting,
-transformations, and more through plugins.
+transformations, and  many more through plugins.
 
 [![][kong-benefits]][kong-url]
 
@@ -44,7 +44,7 @@ Kong has been built with the following leading principles:
   critical use cases and high throughput.
 * **Extensibility**: With a pluggable architecture to extend Kong in Lua or GoLang
   with Kong's Plugin SDK.
-* **Portability**: To run on every platform, every cloud and to natively support
+* **Portability**: To run on every platform and on every cloud and also to natively support
   Kubernetes via our modern Ingress Controller.
 
 ## Features
@@ -230,7 +230,7 @@ Kong relies on three test suites using the [busted] testing library:
 * Integration tests, which require Postgres and Cassandra to be up and running
 * Plugins tests, which require Postgres to be running
 
-The first can simply be run after installing busted and running:
+The first thing that can simply be run after installing busted and running:
 
 ```
 $ make test
